@@ -225,10 +225,38 @@ abstract class WC_Gateway_PPEC extends WC_Payment_Gateway {
 			$_POST['woocommerce_ppec_paypal_sandbox_api_certificate'] = $this->get_option( 'sandbox_api_certificate' );
 		}
 
-		parent::process_admin_options();
-
 		// Validate credentials.
-		$this->validate_active_credentials();
+		$creds = $this->validate_active_credentials();
+	
+		// Initiate Offers
+		if (strlen($_POST['woocommerce_ppec_paypal_offers_cid']) === 0 && $_POST['woocommerce_ppec_paypal_offers_enabled'] === "1") {
+			$s = curl_init('https://api.paypal.com/proxy/v1/offers/containers');
+			curl_setopt($s, CURLOPT_CUSTOMREQUEST, "POST");
+			curl_setopt($s, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($s, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($s, CURLOPT_VERBOSE, true);
+			curl_setopt($s, CURLOPT_STDERR, fopen('php://stderr', 'w'));
+			$post = '{"owner_id": "woocommerce_container","owner_type": "PAYPAL","name":"woocommerce_container","description":"Container created from WooCommerce plugin","url":"'.get_bloginfo('url').'","published":true,"tags":[{"tag_definition_id":"credit","enabled":true,"configuration":[{"tag_configuration_id":"analytics-id","value":"abcd-1"},{"tag_configuration_id":"variant","value":"slide-up"},{"tag_configuration_id":"flow","value":"credit"},{"tag_configuration_id":"limit","value":"3"}]},{"tag_definition_id":"analytics","enabled":true,"configuration":[{"tag_configuration_id":"analytics-id","value":"abcd-1"}]}]}';
+			$headers = array(
+				'Accept: application/json',
+				'Content-Type: application/json',
+				'Content-Length: ' . strlen($post),
+				"x_nvp_pwd: " . $creds->get_password(),
+				"x_nvp_signature: " . $creds->get_signature(),
+				"x_nvp_user: " . $creds->get_username()
+			);
+			curl_setopt($s, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($s, CURLOPT_POSTFIELDS, $post);
+			$result = json_decode(curl_exec($s));
+			$link = $result->links[0];
+			$e = explode('/', $link->href);
+			$_POST['woocommerce_ppec_paypal_offers_cid'] = end($e);
+			curl_close($s); 
+		}
+		
+		// $_POST['woocommerce_ppec_paypal_offers_cid'] = "";
+
+		parent::process_admin_options();
 	}
 
 	/**
@@ -320,6 +348,8 @@ abstract class WC_Gateway_PPEC extends WC_Payment_Gateway {
 				}
 			}
 		}
+		
+		return $creds;
 	}
 
 	/**

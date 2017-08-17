@@ -48,6 +48,8 @@ if ( ! $this->is_credit_supported() ) {
 	$credit_enabled_label .= '<p><em>' . __( 'This option is disabled. Currently PayPal Credit only available for U.S. merchants.', 'woocommerce-gateway-paypal-express-checkout' ) . '</em></p>';
 }
 
+$settings = wc_gateway_ppec()->settings;
+
 wc_enqueue_js( "
 	jQuery( function( $ ) {
 		var ppec_mark_fields      = '#woocommerce_ppec_paypal_title, #woocommerce_ppec_paypal_description';
@@ -74,6 +76,25 @@ wc_enqueue_js( "
 				if ( ! enable_sandbox_toggle ) {
 					$( ppec_sandbox_fields ).closest( 'tr' ).show();
 				}
+			}
+		}).change();
+
+		if ( $( '#woocommerce_ppec_paypal_offers_enabled' ).is( ':checked' ) && $( '#woocommerce_ppec_paypal_offers_cid' ).val().length > 0) {
+			$( '#woocommerce_ppec_paypal_offers_enabled' ).closest('td').append('<div id=\"paypal-muse-button-container\"></div>');
+			MUSEButton('paypal-muse-button-container', {
+				cid: document.getElementById('woocommerce_ppec_paypal_offers_cid').value
+			});
+		}
+
+		$( '#woocommerce_ppec_paypal_offers_enabled' ).change(function(){
+			if ( $( this ).is( ':checked' ) && $( '#woocommerce_ppec_paypal_offers_cid' ).val().length > 0) {
+				
+				$( this ).closest('td').append('<div id=\"paypal-muse-button-container\"></div>');
+				MUSEButton('#paypal-muse-button-container', {
+					cid: document.getElementById('woocommerce_ppec_paypal_offers_cid').value
+				});
+			} else {
+				$('#paypal-muse-button-container').remove();
 			}
 		}).change();
 
@@ -323,6 +344,22 @@ return array(
 		'default'     => 'no',
 		'desc_tip'    => true,
 		'description' => __( 'This enables PayPal Credit, which displays a PayPal Credit button next to the Express Checkout button. PayPal Express Checkout lets you give customers access to financing through PayPal Credit® - at no additional cost to you. You get paid up front, even though customers have more time to pay. A pre-integrated payment button shows up next to the PayPal Button, and lets customers pay quickly with PayPal Credit®.', 'woocommerce-gateway-paypal-express-checkout' ),
+	),
+	'offers_enabled' => array(
+		'title'       => __( 'Enable PayPal Offers', 'woocommerce-gateway-paypal-express-checkout' ),
+		'type'        => 'checkbox',
+		'label'       => $offers_enabled_label,
+		'default'     => 'no',
+		'desc_tip'    => true,
+		'description' => __( 'This enables PayPal Offers which places banners on your site' ),
+	),
+	'offers_cid' => array(
+		'title'       => __( 'Offers Container ID', 'woocommerce-gateway-paypal-express-checkout' ),
+		'type'        => 'hidden',
+		'label'       => $offers_cid,
+		'default'     => 'no',
+		'desc_tip'    => true,
+		'description' => __( 'Do not change this!' ),
 	),
 	'checkout_on_single_product_enabled' => array(
 		'title'       => __( 'Checkout on Single Product', 'woocommerce-gateway-paypal-express-checkout' ),

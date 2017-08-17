@@ -29,6 +29,11 @@ class WC_Gateway_PPEC_Admin_Handler {
 
 		add_action( 'load-woocommerce_page_wc-settings', array( $this, 'maybe_redirect_to_ppec_settings' ) );
 		add_action( 'load-woocommerce_page_wc-settings', array( $this, 'maybe_reset_api_credentials' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_scripts' ));
+	}
+
+	public function load_admin_scripts() {
+		wp_enqueue_script( 'paypal-muse-js', 'https://www.paypalobjects.com/muse/partners/mini-bridge-bundle.js', array(), null, true );
 	}
 
 	public function add_capture_charge_order_action( $actions ) {
