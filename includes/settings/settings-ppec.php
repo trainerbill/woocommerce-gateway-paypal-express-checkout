@@ -48,8 +48,11 @@ if ( ! $this->is_credit_supported() ) {
 	$credit_enabled_label .= '<p><em>' . __( 'This option is disabled. Currently PayPal Credit only available for U.S. merchants.', 'woocommerce-gateway-paypal-express-checkout' ) . '</em></p>';
 }
 
+$settings = wc_gateway_ppec()->settings;
+
 wc_enqueue_js( "
 	jQuery( function( $ ) {
+
 		var ppec_mark_fields      = '#woocommerce_ppec_paypal_title, #woocommerce_ppec_paypal_description';
 		var ppec_live_fields      = '#woocommerce_ppec_paypal_api_username, #woocommerce_ppec_paypal_api_password, #woocommerce_ppec_paypal_api_signature, #woocommerce_ppec_paypal_api_certificate, #woocommerce_ppec_paypal_api_subject';
 		var ppec_sandbox_fields   = '#woocommerce_ppec_paypal_sandbox_api_username, #woocommerce_ppec_paypal_sandbox_api_password, #woocommerce_ppec_paypal_sandbox_api_signature, #woocommerce_ppec_paypal_sandbox_api_certificate, #woocommerce_ppec_paypal_sandbox_api_subject';
@@ -61,6 +64,10 @@ wc_enqueue_js( "
 			$( ppec_sandbox_fields + ',' + ppec_live_fields ).closest( 'tr' ).hide();
 
 			if ( 'live' === $( this ).val() ) {
+				$( '#woocommerce_ppec_paypal_offers_enabled' ).closest( 'tr' ).show();
+				$( '#muse-not-available' ).hide();
+				
+				
 				$( '#woocommerce_ppec_paypal_api_credentials, #woocommerce_ppec_paypal_api_credentials + p' ).show();
 				$( '#woocommerce_ppec_paypal_sandbox_api_credentials, #woocommerce_ppec_paypal_sandbox_api_credentials + p' ).hide();
 
@@ -68,12 +75,34 @@ wc_enqueue_js( "
 					$( ppec_live_fields ).closest( 'tr' ).show();
 				}
 			} else {
+				$( '#woocommerce_ppec_paypal_offers_enabled' ).closest( 'tr' ).hide();
+				$( '#muse-not-available' ).show();
+
 				$( '#woocommerce_ppec_paypal_api_credentials, #woocommerce_ppec_paypal_api_credentials + p' ).hide();
 				$( '#woocommerce_ppec_paypal_sandbox_api_credentials, #woocommerce_ppec_paypal_sandbox_api_credentials + p' ).show();
 
 				if ( ! enable_sandbox_toggle ) {
 					$( ppec_sandbox_fields ).closest( 'tr' ).show();
 				}
+			}
+		}).change();
+
+		$( '#woocommerce_ppec_paypal_offers_enabled' ).change(function(){
+			if ( $( this ).is( ':checked' ) && $( '#woocommerce_ppec_paypal_offers_cid' ).val().length > 0) {
+				if ($.find( '#paypal-muse-button-container' ).length === 0) {
+					$( this ).closest('tr').append('<td><div id=\"paypal-muse-button-container\"></div></td>');
+					MUSEButton('paypal-muse-button-container', {
+						cid: document.getElementById('woocommerce_ppec_paypal_offers_cid').value
+					});
+				}
+				$('.paypalTOC').hide();
+				$('#paypalInsightsLink').show();
+				$('.muse-right-container').hide();
+			} else {
+				$('#paypal-muse-button-container').remove();
+				$('#paypalInsightsLink').hide();
+				$('.paypalTOC').show();
+				$('.muse-right-container').show();
 			}
 		}).change();
 
@@ -106,7 +135,10 @@ wc_enqueue_js( "
 			} );
 		}
 	});
-" );
+	$('#woocommerce_ppec_paypal_offers_cid').closest('tr').hide();
+" 
+. (($_SERVER['REQUEST_METHOD'] === 'GET') ? "$('h3.wc-settings-sub-title').prepend('<hr/>')" : "")
+);
 
 /**
  * Settings for PayPal Gateway.
@@ -120,7 +152,6 @@ return array(
 		'desc_tip'    => true,
 		'default'     => 'yes',
 	),
-
 	'title' => array(
 		'title'       => __( 'Title', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'text',
@@ -135,7 +166,6 @@ return array(
 		'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-paypal-express-checkout' ),
 		'default'     => __( 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.', 'woocommerce-gateway-paypal-express-checkout' ),
 	),
-
 	'account_settings' => array(
 		'title'       => __( 'Account Settings', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'title',
@@ -153,7 +183,6 @@ return array(
 			'sandbox' => __( 'Sandbox', 'woocommerce-gateway-paypal-express-checkout' ),
 		),
 	),
-
 	'api_credentials' => array(
 		'title'       => __( 'API Credentials', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'title',
@@ -237,7 +266,56 @@ return array(
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce-gateway-paypal-express-checkout' ),
 	),
+	'promotions_insights_desc' => array(
+		'title'       => __( 'Promote PayPal Credit to help boost sales and gain business insights', 'woocommerce-gateway-paypal-express-checkout' ),
+		'type'        => 'title',
+		'description' => __( '
+			<div id="muse-container">
+				<div class="muse-left-container">
+					<div class="muse-description">
+						<p>With more time to pay with PayPal Credit, your shoppers are more likely to complete their purchases and spend more. In addition, you will get free business insights into your customers&#39; shopping habits; like how often they shop, how much they spend, and how they interact with your website to help you make smarter sales and marketing decisions.</p>
+					</div>
+					<div class="paypalTOC">
+						<p>By clicking Enable below, you acknowledge you have the right to use the PayPal Insights tool and to collect information from shoppers on your site. <a href="https://www.paypal.com/tagmanager/terms">See terms and conditions</a></p>
+						<p>By enabling promotions, you acknowledge that you have agreed to, and accepted the terms of, the PayPal User Agreement, including the <a href="https://www.paypal.com/webapps/mpp/ua/useragreement-full#advertising-program">terms and conditions</a> thereof applicable to the PayPal Advertising Program.</p>
+					</div>
+					<div id="paypalInsightsLink">You can view insights about your visitors. <a target="_blank" href="https://business.paypal.com/merchantdata/reportHome">View Shopper Insights</a></div>
+				</div>
+				<div class="muse-right-container">
+					<div>
+						<img src="'. wc_gateway_ppec()->plugin_url . 'assets/img/muse1.png"/>
+						<div>Merchants like you have increased their average order value (AOV) by upto 68%*</div>
+					</div>
+					<div>
+						<img src="'. wc_gateway_ppec()->plugin_url . 'assets/img/muse2.png"/>
+						<div>Join 20,000 merchants who are promoting financing options on their site to boost sales</div>
+					</div>
+					<div>
+						<img src="'. wc_gateway_ppec()->plugin_url . 'assets/img/muse3.png"/>
+						<div>Get insights about your visitors and how they shop on your site</div>
+					</div>
+				</div>
+			</div>
+			<div id="muse-not-available">* only availabe in live mode</div>
+	', 'woocommerce-gateway-paypal-express-checkout' ),
+	),
 
+	'offers_enabled' => array(
+		'title'       => __( 'PayPal Insights &amp; Promotions', 'woocommerce-gateway-paypal-express-checkout' ),
+		'type'        => 'checkbox',
+		'label'       => 'Enable',
+		'default'     => 'no',
+		'desc_tip'    => true,
+		'description' => __( 'This enables PayPal Marketing Solutions' ),
+	),
+	'offers_cid' => array(
+		'title'       => __( 'Offers Container ID', 'woocommerce-gateway-paypal-express-checkout' ),
+		'type'        => 'text',
+		'label'       => false,
+		'default'     => 'no',
+		'desc_tip'    => true,
+		'description' => __( 'Do not change this!' ),
+	),
 	'display_settings' => array(
 		'title'       => __( 'Display Settings', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'title',
@@ -331,7 +409,6 @@ return array(
 		'default'     => 'no',
 		'description' => __( 'Enable Express checkout on Single Product view.', 'woocommerce-gateway-paypal-express-checkout' ),
 	),
-
 	'advanced' => array(
 		'title'       => __( 'Advanced Settings', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'title',
