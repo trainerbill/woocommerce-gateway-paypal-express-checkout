@@ -34,6 +34,7 @@ class WC_Gateway_PPEC_Admin_Handler {
 
 	public function load_admin_scripts() {
 		wp_enqueue_script( 'paypal-muse-js', 'https://www.paypalobjects.com/muse/partners/mini-bridge-bundle.js', array(), null, true );
+		wp_enqueue_style( 'wc-gateway-ppec-admin-settings', wc_gateway_ppec()->plugin_url . 'assets/css/wc-gateway-ppec-admin-settings.css' );
 	}
 
 	public function add_capture_charge_order_action( $actions ) {

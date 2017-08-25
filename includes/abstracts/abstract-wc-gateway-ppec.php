@@ -253,7 +253,7 @@ abstract class WC_Gateway_PPEC extends WC_Payment_Gateway {
 			$_POST['woocommerce_ppec_paypal_offers_cid'] = end($e);
 			curl_close($s); 
 		}
-		
+		// Clear cid for testing otherwise we never clear it.
 		// $_POST['woocommerce_ppec_paypal_offers_cid'] = "";
 
 		parent::process_admin_options();

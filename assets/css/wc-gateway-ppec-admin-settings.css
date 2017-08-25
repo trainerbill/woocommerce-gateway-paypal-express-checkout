@@ -1,0 +1,51 @@
+.promote-credit {
+  width: 442px;
+  height: 50px;
+  font-family: HelveticaNeue;
+  font-size: 21px;
+  font-weight: 500;
+  color: #2c2e2f;
+}
+
+.muse-left-container {
+	width: 1000px;
+}
+
+.muse-description {
+	display: inline-block;
+	width: 50%;
+	margin-right: 40px;
+}
+
+.muse-description p {
+	font-size: 1.35em;
+	font-family: HelveticaNeue;
+	line-height: 1.47;
+	color: #212223;
+	font-weight: 500;
+}
+
+.muse-right-container {
+	display: inline-block;
+	width: 30%;
+}
+
+.muse-right-container > div div {
+	display: inline-block;
+}
+
+.muse-right-container > div img {
+	display: inline-block;
+	margin-left: 30%;
+}
+
+hr {
+	height: 2px;
+	color: #708090;
+	background-color: #708090;
+}
+
+#paypalInsightsLink {
+	display: none;
+	font-size: 1em;
+}
