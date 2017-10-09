@@ -210,10 +210,6 @@ class WC_Gateway_PPEC_Cart_Handler {
 
 		if ( is_cart() ) {
 			
-			if ($settings->offers_enabled === yes && strlen($settings->offers_cid) > 0 ) {
-				wp_enqueue_script('paypal-merchant-offers-js', wc_gateway_ppec()->plugin_url . 'assets/js/wc-gateway-ppec-frontend-offers.js?id='.$settings->offers_cid);
-			}
-			
 			wp_enqueue_script( 'paypal-checkout-js', 'https://www.paypalobjects.com/api/checkout.js', array(), null, true );
 			wp_enqueue_script( 'wc-gateway-ppec-frontend-in-context-checkout', wc_gateway_ppec()->plugin_url . 'assets/js/wc-gateway-ppec-frontend-in-context-checkout.js', array( 'jquery' ), wc_gateway_ppec()->version, true );
 			wp_localize_script( 'wc-gateway-ppec-frontend-in-context-checkout', 'wc_ppec_context',
@@ -237,6 +233,11 @@ class WC_Gateway_PPEC_Cart_Handler {
 					'ajaxurl'             => WC_AJAX::get_endpoint( 'wc_ppec_generate_cart' ),
 				)
 			);
+		}
+
+		if ($settings->offers_enabled === yes && strlen($settings->offers_cid) > 0 ) {
+			wp_enqueue_script('paypal-merchant-offers-js', wc_gateway_ppec()->plugin_url . 'assets/js/wc-gateway-ppec-frontend-offers.js');
+			wp_add_inline_script('paypal-merchant-offers-js', ";(function(a,t,o,m,s){a[m]=a[m]||[];a[m].push({t:new Date().getTime(),event:'snippetRun'});var f=t.getElementsByTagName(o)[0],e=t.createElement(o),d=m!=='paypalDDL'?'&m='+m:'';e.async=!0;e.src='https://www.paypal.com/tagmanager/pptm.js?id='+s+d;f.parentNode.insertBefore(e,f);})(window,document,'script','paypalDDL','$settings->offers_cid');");
 		}
 	}
 

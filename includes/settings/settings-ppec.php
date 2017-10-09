@@ -52,6 +52,7 @@ $settings = wc_gateway_ppec()->settings;
 
 wc_enqueue_js( "
 	jQuery( function( $ ) {
+
 		var ppec_mark_fields      = '#woocommerce_ppec_paypal_title, #woocommerce_ppec_paypal_description';
 		var ppec_live_fields      = '#woocommerce_ppec_paypal_api_username, #woocommerce_ppec_paypal_api_password, #woocommerce_ppec_paypal_api_signature, #woocommerce_ppec_paypal_api_certificate, #woocommerce_ppec_paypal_api_subject';
 		var ppec_sandbox_fields   = '#woocommerce_ppec_paypal_sandbox_api_username, #woocommerce_ppec_paypal_sandbox_api_password, #woocommerce_ppec_paypal_sandbox_api_signature, #woocommerce_ppec_paypal_sandbox_api_certificate, #woocommerce_ppec_paypal_sandbox_api_subject';
@@ -63,6 +64,10 @@ wc_enqueue_js( "
 			$( ppec_sandbox_fields + ',' + ppec_live_fields ).closest( 'tr' ).hide();
 
 			if ( 'live' === $( this ).val() ) {
+				$( '#woocommerce_ppec_paypal_offers_enabled' ).closest( 'tr' ).show();
+				$( '#muse-not-available' ).hide();
+				
+				
 				$( '#woocommerce_ppec_paypal_api_credentials, #woocommerce_ppec_paypal_api_credentials + p' ).show();
 				$( '#woocommerce_ppec_paypal_sandbox_api_credentials, #woocommerce_ppec_paypal_sandbox_api_credentials + p' ).hide();
 
@@ -70,6 +75,9 @@ wc_enqueue_js( "
 					$( ppec_live_fields ).closest( 'tr' ).show();
 				}
 			} else {
+				$( '#woocommerce_ppec_paypal_offers_enabled' ).closest( 'tr' ).hide();
+				$( '#muse-not-available' ).show();
+
 				$( '#woocommerce_ppec_paypal_api_credentials, #woocommerce_ppec_paypal_api_credentials + p' ).hide();
 				$( '#woocommerce_ppec_paypal_sandbox_api_credentials, #woocommerce_ppec_paypal_sandbox_api_credentials + p' ).show();
 
@@ -262,12 +270,16 @@ return array(
 		'title'       => __( 'Promote PayPal Credit to help boost sales and gain business insights', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'title',
 		'description' => __( '
-			<div class="muse-left-container">
-				<div class="muse-description">
-					<p>With more time to pay with PayPal Credit, your shoppers are more likely to complete their purchases and spend more. In addition, you&#39;ll get free business insights.</p>
-					<p class="paypalTOC">By clicking Enable below, you acknowledge you have the right to use the PayPal Insights tool and to collect information from shoppers on your site. See terms and conditions</p>
-					<p class="paypalTOC">By enabling promotions, you acknowledge that you have agreed to, and accepted the terms of, the PayPal User Agreement, including the terms and conditions thereof applicable to the PayPal Advertising Program.</p>
-					<p id="paypalInsightsLink">You can view insights about your visitors. <a href="">View Shopper Insights</a></p>
+			<div id="muse-container">
+				<div class="muse-left-container">
+					<div class="muse-description">
+						<p>With more time to pay with PayPal Credit, your shoppers are more likely to complete their purchases and spend more. In addition, you will get free business insights into your customers&#39; shopping habits; like how often they shop, how much they spend, and how they interact with your website to help you make smarter sales and marketing decisions.</p>
+					</div>
+					<div class="paypalTOC">
+						<p>By clicking Enable below, you acknowledge you have the right to use the PayPal Insights tool and to collect information from shoppers on your site. <a href="https://www.paypal.com/tagmanager/terms">See terms and conditions</a></p>
+						<p>By enabling promotions, you acknowledge that you have agreed to, and accepted the terms of, the PayPal User Agreement, including the <a href="https://www.paypal.com/webapps/mpp/ua/useragreement-full#advertising-program">terms and conditions</a> thereof applicable to the PayPal Advertising Program.</p>
+					</div>
+					<div id="paypalInsightsLink">You can view insights about your visitors. <a target="_blank" href="https://business.paypal.com/merchantdata/reportHome">View Shopper Insights</a></div>
 				</div>
 				<div class="muse-right-container">
 					<div>
@@ -284,16 +296,17 @@ return array(
 					</div>
 				</div>
 			</div>
+			<div id="muse-not-available">* only availabe in live mode</div>
 	', 'woocommerce-gateway-paypal-express-checkout' ),
 	),
 
 	'offers_enabled' => array(
-		'title'       => __( 'Promote PayPal Credit', 'woocommerce-gateway-paypal-express-checkout' ),
+		'title'       => __( 'PayPal Insights &amp; Promotions', 'woocommerce-gateway-paypal-express-checkout' ),
 		'type'        => 'checkbox',
 		'label'       => 'Enable',
 		'default'     => 'no',
 		'desc_tip'    => true,
-		'description' => __( 'This enables PayPal Offers which places banners on your site' ),
+		'description' => __( 'This enables PayPal Marketing Solutions' ),
 	),
 	'offers_cid' => array(
 		'title'       => __( 'Offers Container ID', 'woocommerce-gateway-paypal-express-checkout' ),
